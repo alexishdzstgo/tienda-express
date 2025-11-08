@@ -2,8 +2,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #7e22ce 50%, #ffffff 50%);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start; /* dejar espacio para nav en top */
+  align-items: flex-start;
   background-attachment: fixed;
 }
 
@@ -14,34 +14,39 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 400px;
+  margin: 6.5rem auto 3rem; /* dejar espacio superior para el nav fijo */
 }
 
 /* 🔝 NAV SUPERIOR */
 .nav-container {
   width: 100%;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.25rem;
   position: fixed;
   top: 0;
   left: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  background: transparent; /* sin fondo */
-  transition: all 0.3s ease;
-  z-index: 10;
+  justify-content: flex-start; /* left on large screens */
+  background: transparent; /* sin fondo por defecto */
+  transition: all 0.2s ease;
+  z-index: 50;
 }
 
 .nav-container.scrolled {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .nav-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #ecd6ff; /* 💜 tono morado elegante */
-  transition: color 0.3s ease;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff; /* blanco para contrastar con el fondo morado */
+  transition: color 0.2s ease;
+}
+
+.nav-container.scrolled .nav-title {
+  color: #7e22ce; /* cuando el fondo del nav se vuelve blanco, mostrar el morado */
 }
 
 /* 📱 En móviles centramos el título */

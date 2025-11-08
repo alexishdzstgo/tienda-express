@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 import api from "../services/api";
@@ -25,6 +25,14 @@ export default function AuthPage() {
   const [fuerza, setFuerza] = useState({ nivel: 0, texto: "", color: "" });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  // track touched fields so validation icons only appear after the user interacts
+  const [touched, setTouched] = useState({
+    nombre: false,
+    email: false,
+    password: false,
+    confirmar: false,
+  });
 
   // 🔍 Validadores
   const validarNombre = (nombre) => {
@@ -70,6 +78,8 @@ export default function AuthPage() {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
     setMensaje("");
+    // marcar campo como 'touched' la primera vez que se escribe
+    if (!touched[name]) setTouched((prev) => ({ ...prev, [name]: true }));
 
     if (modo === "register") {
       if (name === "nombre") {
@@ -135,16 +145,30 @@ export default function AuthPage() {
       // Guardar la respuesta (token/usuario) — adaptar según backend
       localStorage.setItem("adminData", JSON.stringify(res.data));
       if (modo === "login") navigate("/admin");
-    } catch {
+    } catch (error) {
       // Mejorar detalle de error si el backend lo provee
-      const err = arguments[0] || {};
+      const err = error || {};
       const serverMsg = err.response?.data?.message || err.response?.data || err.message;
-      setMensaje(`❌ ${serverMsg || "Ocurrió un error, revisa tus datos"}`);
+
+      // Si el backend devuelve validaciones por campo en `errors`, mostrarlas inline
+      if (err.response?.data?.errors && typeof err.response.data.errors === "object") {
+        setErrores(err.response.data.errors);
+      } else {
+        setMensaje(`❌ ${serverMsg || "Ocurrió un error, revisa tus datos"}`);
+      }
     }
     finally {
       setIsLoading(false);
     }
   };
+
+  // Si la URL contiene ?mode=register o ?mode=login, usar ese modo al montar la página.
+  useEffect(() => {
+    const qs = new URLSearchParams(location.search);
+    const m = qs.get("mode");
+    if (m === "register" || m === "login") setModo(m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   // 💫 Icono de validación animado
   const IconoValidacion = ({ valido }) => (
@@ -182,22 +206,24 @@ export default function AuthPage() {
   };
 
   return (
-    
     <div className="auth-container">
-      <nav className="flex justify-start md:justify-center items-center p-4">
-        <h1 className="text-3xl font-bold text-purple-700">Tienda-Express</h1>
+      {/* Nav superior fijo: usamos las clases de CSS personalizado para controlar posición y contraste */}
+      <nav className="nav-container">
+        <Link to="/" className="nav-title">
+          Tienda-Express
+        </Link>
       </nav>
 
       <div className="auth-form">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.form
             key={modo}
             onSubmit={handleSubmit}
             variants={variants}
-            initial="hidden"
+            initial={false} /* evitar animación de entrada que hace que el formulario 'tarde' en aparecer */
             animate="visible"
             exit="exit"
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.12 }}
             className="space-y-4"
           >
             <h2 className="text-xl font-semibold text-center text-gray-700 mb-2">
@@ -221,7 +247,7 @@ export default function AuthPage() {
                     errores.nombre ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                <IconoValidacion valido={validaciones.nombre} />
+                <IconoValidacion valido={touched.nombre ? validaciones.nombre : null} />
                 {errores.nombre && (
                   <p className="text-red-500 text-sm mt-1">{errores.nombre}</p>
                 )}
@@ -243,7 +269,7 @@ export default function AuthPage() {
                 }`}
               />
               {modo === "register" && (
-                <IconoValidacion valido={validaciones.email} />
+                <IconoValidacion valido={touched.email ? validaciones.email : null} />
               )}
               {errores.email && (
                 <p className="text-red-500 text-sm mt-1">{errores.email}</p>
@@ -266,7 +292,7 @@ export default function AuthPage() {
   />
   {modo === "register" && (
     <>
-      <IconoValidacion valido={fuerza.nivel >= 4} />
+      <IconoValidacion valido={touched.password ? (fuerza.nivel >= 4) : null} />
 
       {fuerza.texto && (
         <div className="mt-2">
