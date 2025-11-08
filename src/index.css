@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-800;
+  font-family: 'Inter', sans-serif;
+}
+/* --- Fondo diagonal --- */
+.clip-diagonal {
+  clip-path: polygon(0 0, 100% 0, 60% 100%, 0 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease-in-out infinite alternate;
+  position: fixed;
+}
+
+/* --- Animación del gradiente --- */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
