@@ -1,54 +1,20 @@
-import { useState } from "react";
+import AdminRegisterForm from "../components/AdminRegisterForm";
+import { Link } from "react-router-dom";
 
-// AdminRegister.jsx
-export default function AdminRegister({ onSubmit }) {
-  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSubmit) onSubmit(form);
-  };
-
+export default function AdminRegister() {
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-gray-600 mb-1">Nombre</label>
-        <input
-          type="text"
-          name="nombre"
-          value={form.nombre}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
+    <div className="p-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <Link to="/admin" className="text-sm text-gray-600 hover:underline">← Volver al panel</Link>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h1 className="text-2xl font-semibold mb-4">Crear administrador</h1>
+          <p className="text-sm text-gray-600 mb-4">Aquí puedes crear nuevas cuentas de administrador. Asegúrate de incluir el código de país en el teléfono.</p>
+          <AdminRegisterForm />
+        </div>
       </div>
-      <div>
-        <label className="block text-gray-600 mb-1">Correo electrónico</label>
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-      </div>
-      <div>
-        <label className="block text-gray-600 mb-1">Contraseña</label>
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition-all"
-      >
-        Registrarse
-      </button>
-    </form>
+    </div>
   );
 }

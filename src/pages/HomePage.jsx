@@ -7,13 +7,13 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-purple-700">Tienda-Express</h1>
         <div className="space-x-4">
           <Link
-            to="/auth?mode=login"
+            to="/auth?mode=login&instant=1"
             className="text-purple-700 font-semibold hover:underline"
           >
             Iniciar sesión
           </Link>
           <Link
-            to="/auth?mode=register"
+            to="/auth?mode=register&instant=1"
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
           >
             Registrarse
