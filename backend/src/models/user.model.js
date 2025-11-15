@@ -33,5 +33,5 @@ const userSchema = new mongoose.Schema(
 // 🚫 No hay hooks de pre-save ni funciones de hash
 // Todo el encriptado se maneja en el controlador con argon2
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 export default User;

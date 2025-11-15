@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import businessRoutes from "./routes/business.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
 
 dotenv.config();
 connectDB();
@@ -20,5 +21,6 @@ app.use(express.urlencoded({ extended: true })); // 👈 este también ayuda par
 app.use("/api/businesses", businessRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
 
 export default app;

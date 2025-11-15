@@ -40,16 +40,20 @@ export default function OAuthCallback() {
 
         // Guardar en localStorage como fallback
         if (payload?.token) {
-          if (payload.role === "admin" || role === "admin") localStorage.setItem("adminData", JSON.stringify(payload));
-          else localStorage.setItem("userData", JSON.stringify(payload));
+          if (payload.role === "admin" || role === "admin") {
+            localStorage.setItem("adminData", JSON.stringify(payload));
+            // si no hay opener, redirigir admin al dashboard
+            if (!window.opener) navigate("/admin");
+          } else {
+            localStorage.setItem("userData", JSON.stringify(payload));
+            if (!window.opener) navigate("/me");
+          }
         }
 
         // Notificar a la ventana que abrió el popup (si existe)
         if (window.opener) {
           window.opener.postMessage({ type: "oauth_success", data: payload }, window.location.origin);
           window.close();
-        } else {
-          navigate("/auth");
         }
       } catch (err) {
         console.error("Error procesando callback OAuth:", err);

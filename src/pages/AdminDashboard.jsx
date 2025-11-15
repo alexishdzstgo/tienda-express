@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Tooltip from "../components/Tooltip";
 import axios from "axios";
 import {
   LayoutDashboard,
@@ -10,25 +9,16 @@ import {
   Settings,
   Users,
   Menu,
-  Pin,
-  PinOff,
 } from "lucide-react";
 import BusinessForm from "../components/BusinessForm";
 import AdminRegisterForm from "../components/AdminRegisterForm";
+import Sidebar from "../components/Sidebar";
 
 export default function AdminDashboard() {
-  const [collapsed, setCollapsed] = useState(true);
-  const [pinned, setPinned] = useState(() =>
-    typeof window !== "undefined" ? localStorage.getItem("sidebarPinned") === "1" : false
-  );
-  // Si está fijado (pinned) queremos que la sidebar arranque expandida
-  useEffect(() => {
-    if (pinned) setCollapsed(false);
-  }, [pinned]);
+  const hoverTimeoutRef = useRef(null);
   const [businessList, setBusinessList] = useState([]);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [view, setView] = useState("dashboard"); // dashboard | negocios | usuarios | configuracion | crearAdministrador
-  const hoverTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -72,113 +62,23 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* 🔹 Menú lateral */}
-      <aside
-        className={`${collapsed ? "w-16" : "w-64"} bg-white shadow-lg transition-all duration-300 flex flex-col overflow-hidden`}
-        onMouseEnter={() => {
-          // clear pending collapse and expand unless pinned
-          if (!pinned) {
-            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-            setCollapsed(false);
-          }
+      <Sidebar
+        logo="Tienda-Express"
+        items={[
+          { key: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard", to: "/admin" },
+          { key: "negocios", icon: <Store size={20} />, label: "Negocios", to: "/admin/negocios" },
+          { key: "usuarios", icon: <Users size={20} />, label: "Usuarios", to: "/admin/usuarios" },
+          { key: "configuracion", icon: <Settings size={20} />, label: "Configuración", to: "/admin/configuracion" },
+          { key: "crearAdministrador", icon: <Users size={18} />, label: "Crear administrador", to: "/admin/crear-administrador" },
+        ]}
+        selectedKey={view}
+        onSelect={(it) => {
+          setView(it.key);
+          try { localStorage.setItem("adminView", it.key); } catch(e) {}
+          navigate(it.to || "/admin");
         }}
-        onMouseLeave={() => {
-          if (!pinned) {
-            // delay collapse slightly to avoid accidental toggles
-            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-            hoverTimeoutRef.current = setTimeout(() => setCollapsed(true), 220);
-          }
-        }}
-      >
-        <div className="flex items-center justify-between px-4 py-4 border-b flex-nowrap">
-          {!collapsed && (
-            <h2 className="text-lg font-bold text-purple-700 whitespace-nowrap truncate">
-              Tienda-Express
-            </h2>
-          )}
-          <div className="flex items-center gap-2">
-            {/* Mostrar el pin SOLO cuando no esté colapsado. Cuando está colapsado
-                sólo queremos ver el icono hamburguesa para evitar movimientos. */}
-            {!collapsed && (
-              <button
-                title={pinned ? "Fijar sidebar (activado)" : "Fijar sidebar (desactivado)"}
-                onClick={() => {
-                  const next = !pinned;
-                  setPinned(next);
-                  try {
-                    localStorage.setItem("sidebarPinned", next ? "1" : "0");
-                  } catch (e) {}
-                }}
-                className={`p-1 rounded ${pinned ? "bg-purple-100 text-purple-700" : "text-gray-500 hover:bg-gray-100"}`}
-              >
-                {pinned ? <Pin size={16} /> : <PinOff size={16} />}
-              </button>
-            )}
-
-            <div className="flex-shrink-0">
-              {collapsed ? (
-                <Tooltip text={"Pasa el cursor para expandir la barra. Fija la barra desde el icono pin una vez expandida."}>
-                  <Menu className="text-gray-500" size={20} />
-                </Tooltip>
-              ) : (
-                <Menu className="text-gray-500" size={20} />
-              )}
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 py-4 space-y-2">
-          <NavItem
-            icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-            collapsed={collapsed}
-            active={view === "dashboard"}
-            onClick={() => { setView("dashboard"); localStorage.setItem("adminView", "dashboard"); navigate("/admin"); }}
-            to="/admin"
-          />
-          <NavItem
-            icon={<Store size={20} />}
-            label="Negocios"
-            collapsed={collapsed}
-            active={view === "negocios"}
-            onClick={() => { setView("negocios"); localStorage.setItem("adminView", "negocios"); navigate("/admin/negocios"); }}
-            to="/admin/negocios"
-          />
-          <NavItem
-            icon={<Users size={20} />}
-            label="Usuarios"
-            collapsed={collapsed}
-            active={view === "usuarios"}
-            onClick={() => { setView("usuarios"); localStorage.setItem("adminView", "usuarios"); navigate("/admin/usuarios"); }}
-            to="/admin/usuarios"
-          />
-          <NavItem
-            icon={<Settings size={20} />}
-            label="Configuración"
-            collapsed={collapsed}
-            active={view === "configuracion"}
-            onClick={() => { setView("configuracion"); localStorage.setItem("adminView", "configuracion"); navigate("/admin/configuracion"); }}
-            to="/admin/configuracion"
-          />
-          {/* Opción para crear administrador: muestra el formulario en el área principal */}
-          <NavItem
-            icon={<Users size={18} />}
-            label="Crear administrador"
-            collapsed={collapsed}
-            active={view === "crearAdministrador"}
-            onClick={() => { setView("crearAdministrador"); localStorage.setItem("adminView", "crearAdministrador"); navigate("/admin/crear-administrador"); }}
-            to="/admin/crear-administrador"
-          />
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 text-red-600 hover:bg-red-50 p-3 m-2 rounded-lg transition-colors"
-        >
-          <LogOut size={20} />
-          {!collapsed && <span>Cerrar sesión</span>}
-        </button>
-      </aside>
+        onLogout={handleLogout}
+      />
 
       {/* 🔹 Contenido principal */}
       <main className="flex-1 p-6 overflow-y-auto">

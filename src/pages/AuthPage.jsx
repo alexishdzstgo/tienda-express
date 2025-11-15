@@ -203,9 +203,21 @@ export default function AuthPage() {
 
       setMensaje(modo === "register" ? "✅ Registro exitoso" : "✅ Inicio de sesión exitoso");
       // Guardar la respuesta (token/usuario) — adaptar según backend
-      if (modo === "register") localStorage.setItem("userData", JSON.stringify(res.data));
-      else localStorage.setItem("adminData", JSON.stringify(res.data));
-      if (modo === "login") navigate("/admin");
+      if (modo === "register") {
+        localStorage.setItem("userData", JSON.stringify(res.data));
+        // Después de registrar un cliente, llevarlo a su página personal
+        navigate("/me");
+      } else {
+        // login por credenciales: backend debe devolver role o user.role
+        const role = res.data?.role || res.data?.user?.role || "admin";
+        if (role === "admin") {
+          localStorage.setItem("adminData", JSON.stringify(res.data));
+          navigate("/admin");
+        } else {
+          localStorage.setItem("userData", JSON.stringify(res.data));
+          navigate("/me");
+        }
+      }
     } catch (error) {
       // Mejorar detalle de error si el backend lo provee
       const err = error || {};
